@@ -1,0 +1,18 @@
+*.slo
+*.lo
+*.o
+*.obj
+.vs/
+**/.vscode
+.cache/
+*.exe
+*.out
+*.app
+**/.DS_Store
+**/build
+*.d
+*.so
+*.dylib
+*.dll
+
+# thanks geode sdk
