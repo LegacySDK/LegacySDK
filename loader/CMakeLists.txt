@@ -8,6 +8,7 @@ add_library(legacysdk SHARED
     src/dllmain.cpp
     src/terminal.cpp
     src/modloader.cpp
+    src/crashlog/crashlog.cpp
     ../sdk/src/log.cpp
     ../sdk/src/input.cpp
     ../sdk/src/mod.cpp

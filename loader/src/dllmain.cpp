@@ -3,6 +3,7 @@
 
 #include <terminal.hpp>
 #include <modloader.hpp>
+#include <crashlog.hpp>
 
 /*
   * @brief Where it all started:tm:
@@ -11,14 +12,13 @@
 */
 
 DWORD WINAPI SDKMAIN(LPVOID lpParam) {
-    MessageBoxA(
-        NULL,
-        "text",
-        "LegacySDK",
-        MB_OK | MB_ICONINFORMATION
-    );
+    MessageBoxA(NULL,"text","LegacySDK",MB_OK | MB_ICONINFORMATION);
 
     modloader::loadMods();
+
+    Sleep(300);
+    termprintf("Crashing now!");
+    crashlog::triggerCrash();
 
     return 0;
 }
