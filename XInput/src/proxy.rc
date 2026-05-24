@@ -1,0 +1,25 @@
+#include <windows.h>
+
+VS_VERSION_INFO    VERSIONINFO
+FILEFLAGSMASK      VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+  FILEFLAGS        VS_FF_DEBUG | VS_FF_PRERELEASE
+#else
+  FILEFLAGS        0
+#endif
+FILEOS             VOS_NT_WINDOWS32
+FILETYPE           VFT_APP
+FILESUBTYPE        VFT2_UNKNOWN
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904b0" #replac later
+    BEGIN
+      VALUE "CompanyName", "Development team of LegacySDK"
+      VALUE "FileDescription", "LegacySDK Proxy Loader"
+      VALUE "InternalName", "LegacySDK Proxy Loader"
+      VALUE "OriginalFilename", "XINPUT9_1_0.dll"
+      VALUE "ProductName", "LEGACYSDK PROXY LOADER"
+    END
+  END
+END
