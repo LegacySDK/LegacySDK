@@ -7,6 +7,10 @@ i REALLY REALLY need a designer (for icon, banner or whatever), thanks
 # Compiling and running Minecraft Legacy Edition for Windows
 Go over to <a href="./docs/COMPILE.md">COMPILE.md</a> to see how to compile Legacy Edition for Windows
 
+# Getting the SDK
+<a href="./docs/SDK.md">Click me and do all the steps here!</a>
+<h5>though the game WILL CRASH on some versions</h5>
+
 # Example
 <img width="1624" height="870" alt="image" src="https://github.com/user-attachments/assets/91aeff1e-bf16-4158-b4eb-1d47786d473e" />
 Code:
