@@ -35,3 +35,5 @@ oh and minecraft legacy edition goes to 4J Studios & Mojang Studios
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=LegacySDK/LegacySDK&type=date&legend=top-left" />
  </picture>
 </a>
+
+<h6>little note: XInput hooking or whatever was borrowed from Geode SDK, thank you :3</h6>
