@@ -5,7 +5,7 @@ LegacySDK is a modding SDK for Minecraft Legacy Edition (right now a glorified D
 i REALLY REALLY need a designer (for icon, banner or whatever), thanks
 
 # Compiling and running Minecraft Legacy Edition for Windows
-Go over to <a href="./docs/COMPILE.md>COMPILE.md</a> to see how to compile Legacy Edition for Windows
+Go over to <a href="./docs/COMPILE.md">COMPILE.md</a> to see how to compile Legacy Edition for Windows
 
 # Example
 <img width="1624" height="870" alt="image" src="https://github.com/user-attachments/assets/91aeff1e-bf16-4158-b4eb-1d47786d473e" />
