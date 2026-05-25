@@ -1,7 +1,7 @@
 #include <modloader.hpp>
 #include <terminal.hpp>
 #include <filesystem>
-#include "../../../sdk/include/mod.hpp" // skull emoji
+#include <mod.hpp>
 
 namespace modloader {
     static std::vector<LoadedMod> g_loadedMods;

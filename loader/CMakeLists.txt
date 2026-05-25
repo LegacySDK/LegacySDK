@@ -8,10 +8,13 @@ add_library(legacysdk SHARED
     src/dllmain.cpp
     src/terminal.cpp
     src/modloader.cpp
+    src/loader/UI.cpp
     src/crashlog/crashlog.cpp
+    src/crashlog/crashmanager.cpp
     ../sdk/src/log.cpp
     ../sdk/src/input.cpp
     ../sdk/src/mod.cpp
+    ../sdk/src/ui/uicontroller.cpp
 )
 
 if(WIN32)
@@ -24,6 +27,7 @@ target_include_directories(legacysdk PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/minhook/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../sdk/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../sdk/enums
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)

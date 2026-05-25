@@ -4,6 +4,7 @@
 #include <terminal.hpp>
 #include <modloader.hpp>
 #include <crashlog.hpp>
+#include <loader/init.hpp>
 
 /*
   * @brief Where it all started:tm:
@@ -12,13 +13,12 @@
 */
 
 DWORD WINAPI SDKMAIN(LPVOID lpParam) {
-    MessageBoxA(NULL,"text","LegacySDK",MB_OK | MB_ICONINFORMATION);
+    //MessageBoxA(NULL,"text","LegacySDK",MB_OK | MB_ICONINFORMATION);
+
+    MH_Initialize(); //megahack real
 
     modloader::loadMods();
-
-    Sleep(300);
-    termprintf("Crashing now!");
-    crashlog::triggerCrash();
+    loader::load(); // loads stuff like UI and shit idk
 
     return 0;
 }
