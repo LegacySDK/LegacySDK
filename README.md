@@ -1,8 +1,15 @@
-# LegacySDK
-LegacySDK is a modding SDK for Minecraft Legacy Edition (right now a glorified DLL injector)
+<p align="center">
+	<img src="/title.png" />
+	<h1 align="center">
+		LegacySDK
+	</h1>
+</p>
+    <p align="center">
+        LegacySDK is a modding SDK for Minecraft Legacy Edition (right now a glorified DLL injector)
+    </p>
 
-# note
-i REALLY REALLY need a designer (for icon, banner or whatever), thanks
+<br>
+<br>
 
 # Compiling and running Minecraft Legacy Edition for Windows
 Go over to <a href="./docs/COMPILE.md">COMPILE.md</a> to see how to compile Legacy Edition for Windows
