@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <MinHook.h>
 
-#include "../../../sdk/enums/UIController/init.hpp"
+#include <UIController/init.hpp>
 
 void* g_pUIController = nullptr;
 

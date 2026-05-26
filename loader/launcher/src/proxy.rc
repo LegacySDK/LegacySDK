@@ -13,7 +13,7 @@ FILESUBTYPE        VFT2_UNKNOWN
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
-    BLOCK "040904b0" #replac later
+    BLOCK "040904b0"
     BEGIN
       VALUE "CompanyName", "Development team of LegacySDK"
       VALUE "FileDescription", "LegacySDK Proxy Loader"
