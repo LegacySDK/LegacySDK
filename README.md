@@ -1,3 +1,6 @@
+okay why is this blowing up for no reason at all?? \
+heres discord https://discord.gg/s7ynJawdPq btw
+
 <p align="center">
 	<img src="/title.png" />
 	<h1 align="center">
