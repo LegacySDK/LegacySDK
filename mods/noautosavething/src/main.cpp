@@ -1,19 +1,16 @@
 #include <legacysdk/legacysdk.hpp>
-#include <windows.h>
 
 using namespace legacysdk::log;
+using legacysdk::memory::binding::Scene;
 
 $execute([]() {
     info("noautosave mod loaded");
 
-    Sleep(10000);
-
-    info("sleep gone thing idk");
-
-    Sleep(5000);
-
-    info("sleep gone thing idk v2");
-    legacysdk::ui::getUIController()
-    ->navigateToHomeMenu();
-    info("i ran");
+    legacysdk::ui::registerPreNavigateHook([](legacysdk::ui::NavigateContext& ctx) -> bool {
+        if (ctx.scene == static_cast<int>(Scene::SaveMessage)) {
+            info("redirecting SaveMessage to MainMenu (skip autosave prompt)");
+            ctx.scene = static_cast<int>(Scene::MainMenu);
+        }
+        return true;
+    });
 });

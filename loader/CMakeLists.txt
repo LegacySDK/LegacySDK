@@ -15,6 +15,7 @@ add_library(legacysdk SHARED
     src/sdk/main/input.cpp
     src/sdk/main/mod.cpp
     src/sdk/main/ui/uicontroller.cpp
+    src/sdk/main/ui/hooks.cpp
 )
 
 if(WIN32)

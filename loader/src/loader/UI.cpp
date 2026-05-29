@@ -2,6 +2,7 @@
 #include <MinHook.h>
 
 #include <UIController/init.hpp>
+#include <legacysdk/ui/hooks.hpp>
 
 void* g_pUIController = nullptr;
 
@@ -171,14 +172,25 @@ bool __fastcall hknavscene(
         );
     }
 
-    return onavscene(
+    legacysdk::ui::NavigateContext ctx{iPad, scene, initData, layer, group};
+    if (!legacysdk::ui::dispatchPreNavigate(ctx)) {
+        return false;
+    }
+
+    const bool ok = onavscene(
         self,
-        iPad,
-        scene,
-        initData,
-        layer,
-        group
+        ctx.iPad,
+        ctx.scene,
+        ctx.initData,
+        ctx.layer,
+        ctx.group
     );
+
+    if (ok) {
+        legacysdk::ui::dispatchPostNavigate(ctx);
+    }
+
+    return ok;
 }
 
 void initUICONTROLLER() {
