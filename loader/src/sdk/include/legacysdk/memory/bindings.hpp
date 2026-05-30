@@ -23,6 +23,9 @@ namespace legacysdk::memory::binding {
         UnlockOrDLC = 4,
         Exit = 5,
     };
+    constexpr std::uintptr_t kUIControlButtonInit = 0;
+    constexpr std::uintptr_t kMainMenuButtonsOffset = 0x348;
+    constexpr std::size_t kUIControlButtonSize = 0x1A0;
 
     inline std::uintptr_t moduleBase() {
         return reinterpret_cast<std::uintptr_t>(GetModuleHandleA(nullptr));

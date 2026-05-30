@@ -19,5 +19,6 @@ namespace legacysdk::ui {
 
     __declspec(dllexport) bool dispatchPreNavigate(NavigateContext& ctx);
     __declspec(dllexport) void dispatchPostNavigate(const NavigateContext& ctx);
-
+    __declspec(dllexport) bool isUiReady();
+    __declspec(dllexport) void notifyUiReady();
 }

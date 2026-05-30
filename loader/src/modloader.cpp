@@ -44,7 +44,6 @@ namespace modloader {
         using namespace legacysdk::mod;
         dispatchEvent(me::Init);
         dispatchEvent(me::Load);
-        dispatchEvent(me::Enable);
     }
 
     void unloadMods() {

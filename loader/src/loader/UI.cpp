@@ -73,6 +73,8 @@ bool __fastcall hknavscene(
 
         g_pUIController = self;
 
+        legacysdk::ui::notifyUiReady();
+
         legacysdk::ui::initUICONTROLLER(
             g_pUIController,
 

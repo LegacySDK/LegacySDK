@@ -70,6 +70,8 @@ extern "C" {
 
 #define $execute(func) $on_enable(func)
 
+#define $on_ui_ready(func) $on_enable(func)
+
 void reg(me event, eh handler);
 void dispatchEvent(me event);
 

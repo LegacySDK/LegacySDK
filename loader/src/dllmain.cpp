@@ -17,8 +17,8 @@ DWORD WINAPI SDKMAIN(LPVOID lpParam) {
 
     MH_Initialize(); //megahack real
 
-    modloader::loadMods();
-    loader::load(); // loads stuff like UI and shit idk
+    loader::load();
+    modloader::loadMods(); // loads stuff like UI and shit idk
 
     return 0;
 }
