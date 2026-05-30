@@ -34,6 +34,23 @@ $execute([]() {
 });
 ```
 
+Skipping autosave:
+```cpp
+#include <legacysdk/legacysdk.hpp>
+
+using namespace legacysdk::log;
+using legacysdk::memory::binding::Scene;
+
+$execute([]() {
+    legacysdk::ui::registerPreNavigateHook([](legacysdk::ui::NavigateContext& ctx) -> bool {
+        if (ctx.scene == static_cast<int>(Scene::SaveMessage)) {
+            ctx.scene = static_cast<int>(Scene::MainMenu);
+        }
+        return true;
+    });
+});
+```
+
 oh and minecraft legacy edition goes to 4J Studios & Mojang Studios
 
 ## Star History
