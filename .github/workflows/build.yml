@@ -16,34 +16,24 @@ jobs:
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Configure LegacySDK
-        run: |
-          mkdir build
-          cd build
-          cmake ..
-
       - name: Build LegacySDK
         run: |
-          cd build
+          mkdir loader_build
+          cd loader_build
+          cmake ../loader
           cmake --build . --config Release
-
-      - name: Configure Proxy
-        run: |
-          mkdir launcher\build
-          cd launcher\build
-          cmake ..
 
       - name: Build Proxy
         run: |
-          cd launcher\build
+          mkdir launcher_build
+          cd launcher_build
+          cmake ../loader/launcher
           cmake --build . --config Release
 
-      - name: Upload Artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: LegacySDK
+          name: builds
           path: |
-            build/Release/*.dll
-            build/Release/*.exe
-            launcher/build/Release/*.dll
-            launcher/build/Release/*.exe
+            loader_build/Release/*
+            launcher_build/Release/*
