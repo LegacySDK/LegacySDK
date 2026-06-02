@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build LegacySDK
+        run: |
+          mkdir loader_build
+          cd loader_build
+          cmake ../loader
+          cmake --build . --config Release
+
+      - name: Build Proxy
+        run: |
+          mkdir launcher_build
+          cd launcher_build
+          cmake ../loader/launcher
+          cmake --build . --config Release
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: builds
+          path: |
+            loader_build/Release/*
+            launcher_build/Release/*
