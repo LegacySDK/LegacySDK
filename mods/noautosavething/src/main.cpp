@@ -12,6 +12,7 @@ namespace {
         }
         g_buttonRegistered = true;
 
+        info("loaded");
         legacysdk::ui::mainmenu::btn modMenu{};
         modMenu.slot = legacysdk::ui::mainmenu::Slot::Leaderboards;
         modMenu.label = L"LegacySDK";
@@ -25,8 +26,6 @@ namespace {
 }
 
 $execute([]() {
-    info("noautosave mod loaded");
-    
     legacysdk::ui::registerPreNavigateHook([](legacysdk::ui::NavigateContext& ctx) -> bool {
         if (ctx.scene == static_cast<int>(Scene::SaveMessage)) {
             ctx.scene = static_cast<int>(Scene::MainMenu);
