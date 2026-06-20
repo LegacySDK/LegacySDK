@@ -2,7 +2,6 @@
 #include <legacysdk/ui/messagebox.hpp>
 #include <legacysdk/ui/hooks.hpp>
 #include <legacysdk/memory/bindings.hpp>
-#include <terminal.hpp>
 #include <interface/UIController/UIControllerInterface.hpp>
 #include <windows.h>
 #include <vector>
@@ -38,35 +37,55 @@ namespace legacysdk::ui::mainmenu {
             }
         }
 
-        //using InitButtonFn = void* (__fastcall*)(void* self, const wchar_t* label, int id);
-        using InitButtonFn = void (__thiscall*)(void* self, std::basic_string<wchar_t>* label, int id);
+        using InitButtonFn = void(__fastcall*)(void* self, const std::wstring* label, int id);
+
+        UIScene* resolveMainMenuScene() {
+            auto* ui = legacysdk::ui::getUIController();
+            if (!ui) return nullptr;
+
+            auto* scene = ui->findScene(EUIScene::MainMenu);
+            if (legacysdk::memory::binding::isLikelyPointer(scene)) {
+                return scene;
+            }
+
+            scene = ui->getTopScene(0, EUILayer::Fullscreen, EUIGroup::Fullscreen);
+            if (legacysdk::memory::binding::isLikelyPointer(scene)) {
+                return scene;
+            }
+
+            return nullptr;
+        }
 
         void applyButtonLabel(UIScene* scene, Slot slot, const std::wstring& label) {
-            if (!scene || label.empty()) return;
+            if (!legacysdk::memory::binding::isLikelyPointer(scene) || label.empty()) {
+                return;
+            }
 
-            constexpr uintptr_t kOffset  = legacysdk::memory::binding::kMainMenuButtonsOffset;
+            constexpr uintptr_t kOffset = legacysdk::memory::binding::kMainMenuButtonsOffset;
             constexpr uintptr_t kInitRva = legacysdk::memory::binding::kUIControlButtonInit;
-            if (kOffset == 0 || kInitRva == 0) return;
+            if (kOffset == 0 || kInitRva == 0) {
+                return;
+            }
 
-            auto* mainMenu = reinterpret_cast<uint8_t*>(scene);
-            auto* button   = mainMenu + kOffset + 
-                            static_cast<size_t>(slot) * legacysdk::memory::binding::kUIControlButtonSize;
+            auto* button = reinterpret_cast<void*>(
+                reinterpret_cast<uint8_t*>(scene) + kOffset +
+                static_cast<size_t>(slot) * legacysdk::memory::binding::kUIControlButtonSize);
 
-            termprintf("[MAINMENU]: scene=%p button=%p slot=%d", scene, button, (int)slot);
+            if (!legacysdk::memory::binding::isLikelyPointer(button)) {
+                return;
+            }
 
             auto init = reinterpret_cast<InitButtonFn>(legacysdk::memory::binding::rvaToPtr(kInitRva));
-            if (init) {
-                // i gota fix yip
-                std::basic_string<wchar_t> wstr(label);
-                init(button, &wstr, static_cast<int>(slot));
+            if (!init) {
+                return;
             }
+
+            std::wstring copy = label;
+            init(button, &copy, static_cast<int>(slot));
         }
 
         void applyAllLabels() {
-            auto* ui = legacysdk::ui::getUIController();
-            if (!ui) return;
-
-            auto* scene = ui->findScene(EUIScene::MainMenu);
+            auto* scene = resolveMainMenuScene();
             if (!scene) return;
 
             std::lock_guard<std::mutex> lock(g_mutex);
@@ -171,18 +190,7 @@ namespace legacysdk::ui::mainmenu {
             installHooks();
         }
 
-        auto* ui = legacysdk::ui::getUIController();
-        if (!ui) return;
-
-        auto* scene = ui->findScene(EUIScene::MainMenu);
-        if (!scene) return;
-
-        {
-            std::lock_guard<std::mutex> lock(g_mutex);
-            if (!g_buttons.empty()) {
-                applyButtonLabel(scene, g_buttons.back().config.slot, g_buttons.back().config.label);
-            }
-        }
+        applyAllLabels();
     }
 
     void showMessage(unsigned int titleStringId, unsigned int bodyStringId) {
@@ -205,6 +213,10 @@ namespace legacysdk::ui::mainmenu {
 
     void init() {
         installHooks();
+    }
+
+    void refresh() {
+        applyAllLabels();
     }
 
 }

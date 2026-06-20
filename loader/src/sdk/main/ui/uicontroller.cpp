@@ -1,108 +1,115 @@
 #include <interface/UIController/UIControllerInterface.hpp>
+#include <UIController/init.hpp>
+#include <legacysdk/memory/bindings.hpp>
 #include <windows.h>
 
 namespace legacysdk::ui {
-	class UIScene {};
+    class UIScene {};
 
-	typedef void(*FuncNavigateToHomeMenu)(void*);
-	typedef bool(*FuncNavigateToScene)(void*, int, int, void*, int, int);
-	typedef bool(*FuncNavigateBack)(void*, int, bool, int, int);
-	typedef void(*FuncCloseAllPlayersScenes)(void*);
-	typedef void(*FuncCloseUIScenes)(void*, int, bool);
-	typedef UIScene*(*FuncGetTopScene)(void*, int, int, int);
-	typedef bool(*FuncIsSceneInStack)(void*, int, int);
-	typedef UIScene*(*FuncFindScene)(void*, int);
+    using FnNavigateToHomeMenu = void(__fastcall*)(void* self);
+    using FnNavigateToScene = bool(__fastcall*)(void* self, int iPad, int scene, void* initData, int layer, int group);
+    using FnNavigateBack = bool(__fastcall*)(void* self, int iPad, bool forceUsePad, int scene, int layer);
+    using FnCloseAllPlayersScenes = void(__fastcall*)(void* self);
+    using FnCloseUIScenes = void(__fastcall*)(void* self, int iPad, bool forceIPad);
+    using FnGetTopScene = UIScene*(__fastcall*)(void* self, int iPad, int layer, int group);
+    using FnIsSceneInStack = bool(__fastcall*)(void* self, int iPad, int scene);
+    using FnFindScene = UIScene*(__fastcall*)(void* self, int sceneType);
 
-	static void* g_pMinecraftUIController = nullptr;
-	static FuncNavigateToHomeMenu g_pNavigateToHomeMenu = nullptr;
-	static FuncNavigateToScene g_pNavigateToScene = nullptr;
-	static FuncNavigateBack g_pNavigateBack = nullptr;
-	static FuncCloseAllPlayersScenes g_pCloseAllPlayersScenes = nullptr;
-	static FuncCloseUIScenes g_pCloseUIScenes = nullptr;
-	static FuncGetTopScene g_pGetTopScene = nullptr;
-	static FuncIsSceneInStack g_pIsSceneInStack = nullptr;
-	static FuncFindScene g_pFindScene = nullptr;
+    static void* g_pMinecraftUIController = nullptr;
+    static FnNavigateToScene g_pNavigateToScene = nullptr;
 
-	class UIControl : public IUIController {
-	public:
-		void navigateToHomeMenu() override {
-			if (g_pNavigateToHomeMenu && g_pMinecraftUIController) {
-				g_pNavigateToHomeMenu(g_pMinecraftUIController);
-			}
-		}
+    template<typename Fn>
+    static Fn gameFn(std::uintptr_t rva) {
+        return reinterpret_cast<Fn>(legacysdk::memory::binding::rvaToPtr(rva));
+    }
 
-		bool navigateToScene(int iPad, EUIScene scene, void* initData, EUILayer layer, EUIGroup group) override {
-			if (g_pNavigateToScene && g_pMinecraftUIController) {
-				return g_pNavigateToScene(g_pMinecraftUIController, iPad, (int)scene, initData, (int)layer, (int)group);
-			}
-			return false;
-		}
+    class UIControl : public IUIController {
+    public:
+        void navigateToHomeMenu() override {
+            if (!g_pMinecraftUIController) return;
+            if (legacysdk::memory::binding::kNavigateToHomeMenu == 0) return;
+            gameFn<FnNavigateToHomeMenu>(legacysdk::memory::binding::kNavigateToHomeMenu)(g_pMinecraftUIController);
+        }
 
-		bool navigateBack(int iPad, bool forceUsePad, EUIScene scene, EUILayer layer) override {
-			if (g_pNavigateBack && g_pMinecraftUIController) {
-				return g_pNavigateBack(g_pMinecraftUIController, iPad, forceUsePad, (int)scene, (int)layer);
-			}
-			return false;
-		}
+        bool navigateToScene(int iPad, EUIScene scene, void* initData, EUILayer layer, EUIGroup group) override {
+            if (!g_pNavigateToScene || !g_pMinecraftUIController) return false;
+            return g_pNavigateToScene(
+                g_pMinecraftUIController,
+                iPad,
+                static_cast<int>(scene),
+                initData,
+                static_cast<int>(layer),
+                static_cast<int>(group));
+        }
 
-		void closeAllPlayersScenes() override {
-			if (g_pCloseAllPlayersScenes && g_pMinecraftUIController) {
-				g_pCloseAllPlayersScenes(g_pMinecraftUIController);
-			}
-		}
+        bool navigateBack(int iPad, bool forceUsePad, EUIScene scene, EUILayer layer) override {
+            if (!g_pMinecraftUIController || legacysdk::memory::binding::kNavigateBack == 0) return false;
+            return gameFn<FnNavigateBack>(legacysdk::memory::binding::kNavigateBack)(
+                g_pMinecraftUIController,
+                iPad,
+                forceUsePad,
+                static_cast<int>(scene),
+                static_cast<int>(layer));
+        }
 
-		void closeUIScenes(int iPad, bool forceIPad) override {
-			if (g_pCloseUIScenes && g_pMinecraftUIController) {
-				g_pCloseUIScenes(g_pMinecraftUIController, iPad, forceIPad);
-			}
-		}
+        void closeAllPlayersScenes() override {
+            if (!g_pMinecraftUIController || legacysdk::memory::binding::kCloseAllPlayersScenes == 0) return;
+            gameFn<FnCloseAllPlayersScenes>(legacysdk::memory::binding::kCloseAllPlayersScenes)(g_pMinecraftUIController);
+        }
 
-		UIScene* getTopScene(int iPad, EUILayer layer, EUIGroup group) override {
-			if (g_pGetTopScene && g_pMinecraftUIController) {
-				return g_pGetTopScene(g_pMinecraftUIController, iPad, (int)layer, (int)group);
-			}
-			return nullptr;
-		}
+        void closeUIScenes(int iPad, bool forceIPad) override {
+            (void)iPad;
+            (void)forceIPad;
+        }
 
-		bool isSceneInStack(int iPad, EUIScene scene) override {
-			if (g_pIsSceneInStack && g_pMinecraftUIController) {
-				return g_pIsSceneInStack(g_pMinecraftUIController, iPad, (int)scene);
-			}
-			return false;
-		}
+        UIScene* getTopScene(int iPad, EUILayer layer, EUIGroup group) override {
+            if (!g_pMinecraftUIController || legacysdk::memory::binding::kGetTopScene == 0) return nullptr;
+            return gameFn<FnGetTopScene>(legacysdk::memory::binding::kGetTopScene)(
+                g_pMinecraftUIController,
+                iPad,
+                static_cast<int>(layer),
+                static_cast<int>(group));
+        }
 
-		UIScene* findScene(EUIScene sceneType) override {
-			if (g_pFindScene && g_pMinecraftUIController) {
-				return g_pFindScene(g_pMinecraftUIController, (int)sceneType);
-			}
-			return nullptr;
-		}
-	};
+        bool isSceneInStack(int iPad, EUIScene scene) override {
+            if (!g_pMinecraftUIController || legacysdk::memory::binding::kIsSceneInStack == 0) return false;
+            return gameFn<FnIsSceneInStack>(legacysdk::memory::binding::kIsSceneInStack)(
+                g_pMinecraftUIController,
+                iPad,
+                static_cast<int>(scene));
+        }
 
-	static UIControl g_uiController;
+        UIScene* findScene(EUIScene sceneType) override {
+            if (!g_pMinecraftUIController) return nullptr;
 
-	void initUICONTROLLER(void* controller,
-		FuncNavigateToHomeMenu pNavToHome,
-		FuncNavigateToScene pNavToScene,
-		FuncNavigateBack pNavBack,
-		FuncCloseAllPlayersScenes pCloseAll,
-		FuncCloseUIScenes pCloseUI,
-		FuncGetTopScene pGetTop,
-		FuncIsSceneInStack pIsInStack,
-		FuncFindScene pFindScene) {
+            if (legacysdk::memory::binding::kFindScene != 0) {
+                auto* scene = gameFn<FnFindScene>(legacysdk::memory::binding::kFindScene)(
+                    g_pMinecraftUIController,
+                    static_cast<int>(sceneType));
+                if (legacysdk::memory::binding::isLikelyPointer(scene)) {
+                    return scene;
+                }
+            }
 
-		g_pMinecraftUIController = controller;
-		g_pNavigateToHomeMenu = pNavToHome;
-		g_pNavigateToScene = pNavToScene;
-		g_pNavigateBack = pNavBack;
-		g_pCloseAllPlayersScenes = pCloseAll;
-		g_pCloseUIScenes = pCloseUI;
-		g_pGetTopScene = pGetTop;
-		g_pIsSceneInStack = pIsInStack;
-		g_pFindScene = pFindScene;
-	}
+            if (sceneType == EUIScene::MainMenu) {
+                return getTopScene(0, EUILayer::Fullscreen, EUIGroup::Fullscreen);
+            }
 
-	IUIController* getUIController() {
-		return &g_uiController;
-	}
+            return nullptr;
+        }
+    };
+
+    static UIControl g_uiController;
+
+    void initUICONTROLLER(void* controller) {
+        g_pMinecraftUIController = controller;
+    }
+
+    void bindNavigateToScene(FuncNavigateToScene fn) {
+        g_pNavigateToScene = fn;
+    }
+
+    IUIController* getUIController() {
+        return &g_uiController;
+    }
 }
