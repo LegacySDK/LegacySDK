@@ -1,5 +1,5 @@
 #pragma once
-#include "../../enums/UIController/UIController.hpp"
+#include "sdk/enums/UIController/UIController.hpp"
 
 namespace legacysdk::ui {
     class UIScene;

@@ -60,7 +60,7 @@ void initUICONTROLLER() {
 
     MH_CreateHook(
         reinterpret_cast<void*>(addr),
-        &hknavscene,
+        reinterpret_cast<LPVOID>(&hknavscene),
         reinterpret_cast<void**>(&onavscene)
     );
 

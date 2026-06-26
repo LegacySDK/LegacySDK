@@ -1,0 +1,20 @@
+set(CMAKE_SYSTEM_NAME Windows)
+set(CMAKE_SYSTEM_PROCESSOR x86_64)
+
+set(triple x86_64-w64-mingw32)
+
+set(CMAKE_C_COMPILER ${triple}-gcc)
+set(CMAKE_CXX_COMPILER ${triple}-g++)
+set(CMAKE_RC_COMPILER ${triple}-windres)
+
+set(CMAKE_FIND_ROOT_PATH /usr/${triple})
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# Referencing the alternatives routes
+set(PATCH_PATH "${CMAKE_CURRENT_LIST_DIR}/include_fix")
+set(SRC_PATH "${CMAKE_CURRENT_LIST_DIR}/src")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I${PATCH_PATH} -I${SRC_PATH}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${PATCH_PATH} -I${SRC_PATH}")
