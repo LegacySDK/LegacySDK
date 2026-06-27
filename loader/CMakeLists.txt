@@ -34,6 +34,7 @@ target_include_directories(legacysdk PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/sdk/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/sdk/enums
     ${CMAKE_CURRENT_SOURCE_DIR}/src/include_fix # patch for linux
+    ${CMAKE_CURRENT_SOURCE_DIR}/src # Fuck the git accions
 )
 
 # If it's not Windows import the correct library according to the compiler or system 
