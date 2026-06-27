@@ -26,27 +26,18 @@ if(WIN32)
 endif()
 
 target_include_directories(legacysdk PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook_src/include # aded a patch for linux
+    ${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/sdk/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/sdk/enums
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/include_fix # added a patch for linux 
 )
 
-# If it's not Windows import the correct library accordin gto the compiler or system 
-if(NOT WIN32 OR MINGW)
-   #for linux on VSCode
-   set(MINHOOK_LIB "${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook_src/build/minhook.a")
-   message(STATUS "Configuring legacysdk for Linux/MinGW architecture")
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(MINHOOK_LIB "${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook/lib/libMinHook.x64.lib")
+    message(STATUS "Configuring legacysdk for x64 architecture")
 else()
-    # For Windows native (Visual Studio)
-        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-            set(MINHOOK_LIB "${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook/lib_old/libMinHook.x64.lib")
-            message(STATUS "Configuring legacysdk for Windows x64 architecture")
-        else()
-            set(MINHOOK_LIB "${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook/lib_old/libMinHook.x86.lib")
-            message(STATUS "Configuring legacysdk for Windows x86 architecture")
-    endif()
+    set(MINHOOK_LIB "${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook/lib/libMinHook.x86.lib")
+    message(STATUS "Configuring legacysdk for x86 architecture")
 endif()
 
-target_link_libraries(legacysdk PRIVATE "${MINHOOK_LIB}")
+target_link_libraries(legacysdk PRIVATE ${MINHOOK_LIB})
