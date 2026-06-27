@@ -4,6 +4,9 @@ project(legacySDKLoader VERSION 1.0.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# adding a subdirectory new for minhook
+add_subdirectory(minhook)
+
 add_library(legacysdk SHARED
     src/dllmain.cpp
     src/terminal.cpp
@@ -26,27 +29,23 @@ if(WIN32)
 endif()
 
 target_include_directories(legacysdk PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook_src/include # aded a patch for linux
+    ${CMAKE_CURRENT_SOURCE_DIR}/minhook/include # patch for linux
     ${CMAKE_CURRENT_SOURCE_DIR}/src/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/sdk/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src/sdk/enums
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/include_fix # added a patch for linux 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/include_fix # patch for linux
 )
 
-# If it's not Windows import the correct library accordin gto the compiler or system 
+# If it's not Windows import the correct library according to the compiler or system 
 if(NOT WIN32 OR MINGW)
-   #for linux on VSCode
-   set(MINHOOK_LIB "${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook_src/build/minhook.a")
-   message(STATUS "Configuring legacysdk for Linux/MinGW architecture")
+   message(STATUS "Configuring legacysdk for Linux/MinGW")
 else()
-    # For Windows native (Visual Studio)
-        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-            set(MINHOOK_LIB "${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook/lib_old/libMinHook.x64.lib")
-            message(STATUS "Configuring legacysdk for Windows x64 architecture")
-        else()
-            set(MINHOOK_LIB "${CMAKE_CURRENT_SOURCE_DIR}/includes/minhook/lib_old/libMinHook.x86.lib")
-            message(STATUS "Configuring legacysdk for Windows x86 architecture")
-    endif()
+   message(STATUS "Configuring legacysdk for Windows Native")
 endif()
 
-target_link_libraries(legacysdk PRIVATE "${MINHOOK_LIB}")
+# New change after a boring and painful afternoon :
+# Instead of using the variable ${MINHOOK_LIB}, use the target 'minhook'
+# That CMake created when reading the 'minhook' folder.
+# if this detects are you using MinGW, this constructs minhook.a from the src
+# if this detects are you using Visual Studio, this constructs minhook.lib from the src
+target_link_libraries(legacysdk PRIVATE minhook)

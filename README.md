@@ -62,4 +62,16 @@ oh and minecraft legacy edition goes to 4J Studios & Mojang Studios
  </picture>
 </a>
 
-<h6>little note: XInput hooking or whatever was borrowed from Geode SDK, thank you :3</h6>
+## Credits & Licenses
+
+LegacySDK relies on the following open-source projects:
+
+* **[MinHook](https://github.com/TsudaKageyu/minhook):** The Minimalistic API Hooking Library.
+    * Copyright (C) 2009-2017 Tsuda Kageyu. All rights reserved.
+    * Includes portions Copyright (c) 2008-2009, Vyacheslav Patkov (Hacker Disassembler Engine).
+    * Licensed under the BSD 2-Clause License.
+* **[Geode SDK](https://geode-sdk.org/):** Portions of input/hooking logic were inspired by or borrowed from Geode. Thank you for the incredible work :3
+* **Minecraft Legacy Edition:** All rights to the game belong to **Mojang Studios** and **4J Studios**.
+
+---
+*Note: Any MinGW-related documentation or assets used in this repository are credited to their respective owners as per the CC-BY-SA-4.0 license.*

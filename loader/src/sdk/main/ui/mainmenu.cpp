@@ -1,20 +1,35 @@
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include <legacysdk/ui/mainmenu.hpp>
 #include <legacysdk/ui/messagebox.hpp>
 #include <legacysdk/ui/hooks.hpp>
 #include <legacysdk/memory/bindings.hpp>
 #include <interface/UIController/UIControllerInterface.hpp>
-#include <windows.h>
 #include <vector>
-#include <mutex>
+#include <functional>
 
 namespace legacysdk::ui::mainmenu {
     namespace {
+        class NativeMutex {
+            CRITICAL_SECTION cs;
+        public:
+            NativeMutex() { InitializeCriticalSection(&cs); }
+            ~NativeMutex() { DeleteCriticalSection(&cs); }
+            void lock() { EnterCriticalSection(&cs); }
+            void unlock() { LeaveCriticalSection(&cs); }
+        };
+
+        static NativeMutex g_mtx;
+        struct Lock {
+            Lock() { g_mtx.lock(); }
+            ~Lock() { g_mtx.unlock(); }
+        };
+        
         struct RegisteredButton {
             btn config;
             int interceptScene;
         };
 
-        std::mutex g_mutex;
         std::vector<RegisteredButton> g_buttons;
         bool g_hooksInstalled = false;
         bool g_welcomeEnabled = false;
@@ -24,16 +39,11 @@ namespace legacysdk::ui::mainmenu {
 
         int defaultInterceptScene(Slot slot) {
             switch (slot) {
-            case Slot::Leaderboards:
-                return static_cast<int>(EUIScene::LeaderboardsMenu);
-            case Slot::HelpAndOptions:
-                return static_cast<int>(EUIScene::HelpAndOptionsMenu);
-            case Slot::UnlockOrDLC:
-                return static_cast<int>(EUIScene::DLCMainMenu);
-            case Slot::PlayGame:
-                return static_cast<int>(EUIScene::LoadOrJoinMenu);
-            default:
-                return -1;
+            case Slot::Leaderboards: return static_cast<int>(EUIScene::LeaderboardsMenu);
+            case Slot::HelpAndOptions: return static_cast<int>(EUIScene::HelpAndOptionsMenu);
+            case Slot::UnlockOrDLC: return static_cast<int>(EUIScene::DLCMainMenu);
+            case Slot::PlayGame: return static_cast<int>(EUIScene::LoadOrJoinMenu);
+            default: return -1;
             }
         }
 
@@ -42,44 +52,22 @@ namespace legacysdk::ui::mainmenu {
         UIScene* resolveMainMenuScene() {
             auto* ui = legacysdk::ui::getUIController();
             if (!ui) return nullptr;
-
             auto* scene = ui->findScene(EUIScene::MainMenu);
-            if (legacysdk::memory::binding::isLikelyPointer(scene)) {
-                return scene;
-            }
-
+            if (legacysdk::memory::binding::isLikelyPointer(scene)) return scene;
             scene = ui->getTopScene(0, EUILayer::Fullscreen, EUIGroup::Fullscreen);
-            if (legacysdk::memory::binding::isLikelyPointer(scene)) {
-                return scene;
-            }
-
+            if (legacysdk::memory::binding::isLikelyPointer(scene)) return scene;
             return nullptr;
         }
 
         void applyButtonLabel(UIScene* scene, Slot slot, const std::wstring& label) {
-            if (!legacysdk::memory::binding::isLikelyPointer(scene) || label.empty()) {
-                return;
-            }
-
+            if (!legacysdk::memory::binding::isLikelyPointer(scene) || label.empty()) return;
             constexpr uintptr_t kOffset = legacysdk::memory::binding::kMainMenuButtonsOffset;
             constexpr uintptr_t kInitRva = legacysdk::memory::binding::kUIControlButtonInit;
-            if (kOffset == 0 || kInitRva == 0) {
-                return;
-            }
-
-            auto* button = reinterpret_cast<void*>(
-                reinterpret_cast<uint8_t*>(scene) + kOffset +
-                static_cast<size_t>(slot) * legacysdk::memory::binding::kUIControlButtonSize);
-
-            if (!legacysdk::memory::binding::isLikelyPointer(button)) {
-                return;
-            }
-
+            if (kOffset == 0 || kInitRva == 0) return;
+            auto* button = reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(scene) + kOffset + static_cast<size_t>(slot) * legacysdk::memory::binding::kUIControlButtonSize);
+            if (!legacysdk::memory::binding::isLikelyPointer(button)) return;
             auto init = reinterpret_cast<InitButtonFn>(legacysdk::memory::binding::rvaToPtr(kInitRva));
-            if (!init) {
-                return;
-            }
-
+            if (!init) return;
             std::wstring copy = label;
             init(button, &copy, static_cast<int>(slot));
         }
@@ -88,7 +76,7 @@ namespace legacysdk::ui::mainmenu {
             auto* scene = resolveMainMenuScene();
             if (!scene) return;
 
-            std::lock_guard<std::mutex> lock(g_mutex);
+            Lock lock; // Using a lock for compatibility and no errors >:C
             for (const auto& entry : g_buttons) {
                 if (!entry.config.label.empty()) {
                     applyButtonLabel(scene, entry.config.slot, entry.config.label);
@@ -102,7 +90,6 @@ namespace legacysdk::ui::mainmenu {
         void showMessageInternal(unsigned int titleId, unsigned int bodyId) {
             auto* ui = legacysdk::ui::getUIController();
             if (!ui) return;
-
             g_msgOpts[0] = 963;
             g_msgBox = {};
             g_msgBox.uiTitle = titleId;
@@ -110,20 +97,12 @@ namespace legacysdk::ui::mainmenu {
             g_msgBox.uiOptionA = g_msgOpts;
             g_msgBox.uiOptionC = 1;
             g_msgBox.dwFocusButton = 0;
-
-            ui->navigateToScene(
-                0,
-                EUIScene::MessageBox,
-                &g_msgBox,
-                EUILayer::Alert,
-                EUIGroup::Fullscreen);
+            ui->navigateToScene(0, EUIScene::MessageBox, &g_msgBox, EUILayer::Alert, EUIGroup::Fullscreen);
         }
 
         DWORD WINAPI runCallbackThread(LPVOID param) {
             auto* fn = reinterpret_cast<std::function<void()>*>(param);
-            if (fn && *fn) {
-                (*fn)();
-            }
+            if (fn && *fn) (*fn)();
             delete fn;
             return 0;
         }
@@ -134,7 +113,6 @@ namespace legacysdk::ui::mainmenu {
 
         void onMainMenuShown() {
             applyAllLabels();
-
             if (g_welcomeEnabled && !g_welcomeShown) {
                 g_welcomeShown = true;
                 queueCallback([]() { showMessageInternal(g_welcomeTitle, g_welcomeBody); });
@@ -144,7 +122,7 @@ namespace legacysdk::ui::mainmenu {
         bool onPreNavigate(NavigateContext& ctx) {
             std::function<void()> callback;
             {
-                std::lock_guard<std::mutex> lock(g_mutex);
+                Lock lock; // Using a lock for compatibility and no errors >:C
                 for (const auto& entry : g_buttons) {
                     if (!entry.config.onPress) continue;
                     if (ctx.scene != entry.interceptScene) continue;
@@ -152,7 +130,6 @@ namespace legacysdk::ui::mainmenu {
                     break;
                 }
             }
-
             if (callback) {
                 queueCallback(std::move(callback));
                 return false;
@@ -161,15 +138,12 @@ namespace legacysdk::ui::mainmenu {
         }
 
         void onPostNavigate(const NavigateContext& ctx) {
-            if (ctx.scene == static_cast<int>(EUIScene::MainMenu)) {
-                onMainMenuShown();
-            }
+            if (ctx.scene == static_cast<int>(EUIScene::MainMenu)) onMainMenuShown();
         }
 
         void installHooks() {
             if (g_hooksInstalled) return;
             g_hooksInstalled = true;
-
             registerPreNavigateHook(onPreNavigate);
             registerPostNavigateHook(onPostNavigate);
         }
@@ -179,17 +153,12 @@ namespace legacysdk::ui::mainmenu {
         RegisteredButton entry;
         entry.config = std::move(button);
         entry.interceptScene = entry.config.interceptScene;
-        if (entry.interceptScene < 0) {
-            entry.interceptScene = defaultInterceptScene(entry.config.slot);
-        }
-
-        // piece of shit code down here warning
+        if (entry.interceptScene < 0) entry.interceptScene = defaultInterceptScene(entry.config.slot);
         {
-            std::lock_guard<std::mutex> lock(g_mutex);
+            Lock lock; // Using a lock for compatibility and no errors >:C
             g_buttons.push_back(std::move(entry));
             installHooks();
         }
-
         applyAllLabels();
     }
 
@@ -207,16 +176,8 @@ namespace legacysdk::ui::mainmenu {
         g_welcomeBody = bodyStringId;
     }
 
-    void enableWelcomeOnFirstVisit(bool enable) {
-        g_welcomeEnabled = enable;
-    }
+    void enableWelcomeOnFirstVisit(bool enable) { g_welcomeEnabled = enable; }
 
-    void init() {
-        installHooks();
-    }
-
-    void refresh() {
-        applyAllLabels();
-    }
-
+    void init() { installHooks(); }
+    void refresh() { applyAllLabels(); }
 }
