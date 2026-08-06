@@ -1,3 +1,7 @@
+# WARNING, THE ENTIRE CODE **WILL** BE REMOVED SOON BECAUSE THIS IMPLEMENTATION IS ASS AND ITS ASS
+I'LL HAVE TO DO NON WINDOWS BULLSHIT FOR X360, PS3, AND PS4. \
+ENTIRE CODEBASE **WILL** BE REWRITTEN
+
 okay why is this blowing up for no reason at all?? \
 heres discord https://discord.gg/s7ynJawdPq btw
 
